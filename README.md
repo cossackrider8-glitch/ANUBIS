@@ -153,3 +153,14 @@ MIT License – see [LICENSE](LICENSE) for details.
 Bug Hunter | Red Teamer | Open‑Source Enthusiast
 
 > *"Shadow scanning. Absolute precision."*
+
+---
+
+## 📢 Feedback & Future Improvements
+
+This is **ANUBIS v1.0** – we're actively working on more accuracy, clarity, and optimization.
+
+If you encounter any issues, have suggestions, or want to report a bug, please **open an issue** on GitHub.  
+Your honest feedback is highly appreciated and will help shape the next versions.
+
+> *"Shadow scanning. Absolute precision."*
