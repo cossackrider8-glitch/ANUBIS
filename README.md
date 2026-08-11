@@ -1,6 +1,6 @@
 # ☥ ANUBIS – Shadow Scanning. Absolute Precision.
 
-![ANUBIS Banner](anubis_v2.webp)
+![ANUBIS Banner](./anubis_v2.webp)
 
 **ANUBIS is a 40‑phase reconnaissance engine for Bug Bounty & VAPT.**  
 It automates the entire recon pipeline – from WHOIS to SSL/TLS, CORS, JWT, email security, and more – giving you a prioritized attack surface in minutes.
