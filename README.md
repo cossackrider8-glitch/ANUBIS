@@ -1,4 +1,4 @@
-<p align="center"><img src="banner.webp" alt="ANUBIS Banner" width="800"></p>
+<p align="center"><img src="anubis v2" alt="ANUBIS Banner" width="800"></p>
 
 # ☥ ANUBIS – Shadow Scanning. Absolute Precision.
 
