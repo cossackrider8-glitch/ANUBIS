@@ -1,4 +1,3 @@
-cat > anubis.py << 'EOF'
 #!/usr/bin/env python3
 import sys, os, json, requests, socket, concurrent.futures, subprocess, time, argparse, re
 from datetime import datetime
@@ -868,4 +867,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-EOF
