@@ -17,16 +17,49 @@ print(f"""{C}
    ╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝ ╚═════╝ ╚═╝╚══════╝
 
         ☥  SHADOW SCANNING. ABSOLUTE PRECISION.  ⚡
-        🏛️  ANUBIS RECON ENGINE v2.0  🏛️
+        🏛️  ANUBIS RECON ENGINE v2.1  🏛️
         ⚡  Crafted by: Obito Uchiha [ h4ck3r ]  |  ANUBIS Protocol  ⚡
 {RS}""")
 
 DEFAULT_PORTS = [21,22,23,25,53,80,110,111,135,139,143,443,445,993,995,1723,3306,3389,5900,6379,8080,8443,8888,9000,9090]
-DNS_THREADS = 200; PORT_THREADS = 100
+DNS_THREADS = 200
+PORT_THREADS = 100
 
-def save_json(data, fname):
-    with open(fname, 'w') as f:
-        json.dump(data, f, indent=2, default=str)
+def save_output(domain, phase_name, data, output_dir="output"):
+    target_dir = os.path.join(output_dir, domain)
+    os.makedirs(target_dir, exist_ok=True)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    txt_file = os.path.join(target_dir, f"{phase_name}_{timestamp}.txt")
+    
+    with open(txt_file, 'w') as f:
+        f.write(f"ANUBIS Phase: {phase_name}\n")
+        f.write(f"Domain: {domain}\n")
+        f.write(f"Timestamp: {datetime.now().isoformat()}\n")
+        f.write("=" * 60 + "\n\n")
+        
+        if isinstance(data, list):
+            if data and isinstance(data[0], dict):
+                for item in data:
+                    for key, value in item.items():
+                        f.write(f"{key}: {value}\n")
+                    f.write("-" * 40 + "\n")
+            else:
+                for item in data:
+                    f.write(str(item) + "\n")
+        elif isinstance(data, dict):
+            for key, value in data.items():
+                if isinstance(value, list):
+                    f.write(f"{key}: ({len(value)} items)\n")
+                    for v in value[:20]:
+                        f.write(f"  - {v}\n")
+                    if len(value) > 20:
+                        f.write(f"  ... and {len(value)-20} more\n")
+                else:
+                    f.write(f"{key}: {value}\n")
+        else:
+            f.write(str(data))
+    
+    print(f"{C}[📁] Saved: {txt_file}{RS}")
 
 def run_cmd(cmd, timeout=15):
     try:
@@ -37,7 +70,8 @@ def run_cmd(cmd, timeout=15):
 # ---------- Phase 1 ----------
 def phase_01_whois(domain, outdir):
     print(f"{B}[🔵] Phase 1: WHOIS{RS}")
-    save_json({"raw": run_cmd(f"whois {domain}", 10)}, f"{outdir}/phase_01_whois_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    data = {"raw": run_cmd(f"whois {domain}", 10)}
+    save_output(domain, "phase_01_whois", data, outdir)
     print(f"{G}[✅] Phase 1 complete.{RS}")
 
 # ---------- Phase 2 ----------
@@ -46,9 +80,9 @@ def phase_02_asn(domain, outdir):
     try:
         ip = socket.gethostbyname(domain)
         resp = requests.get(f"http://ip-api.com/json/{ip}", timeout=5)
-        save_json(resp.json(), f"{outdir}/phase_02_asn_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+        save_output(domain, "phase_02_asn", resp.json(), outdir)
     except Exception as e:
-        save_json({"error": str(e)}, f"{outdir}/phase_02_asn_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+        save_output(domain, "phase_02_asn", {"error": str(e)}, outdir)
     print(f"{G}[✅] Phase 2 complete.{RS}")
 
 # ---------- Phase 3 ----------
@@ -81,7 +115,7 @@ def phase_03_passive_subdomain(domain, outdir):
         except Exception as e:
             print(f"{R}[!] crt.sh error: {e}{RS}")
     subs = list(subs)
-    save_json(subs, f"{outdir}/phase_03_subdomains_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_03_subdomains", subs, outdir)
     print(f"{G}[✅] Phase 3 complete.{RS}")
     return subs
 
@@ -107,7 +141,7 @@ def phase_04_bruteforce(domain, outdir):
             if full:
                 found.append({'subdomain': full, 'ip': ip})
                 print(f"{G}[+] Found: {full} -> {ip}{RS}")
-    save_json(found, f"{outdir}/phase_04_bruteforce_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_04_bruteforce", found, outdir)
     print(f"{G}[✅] Phase 4 complete.{RS}")
     return found
 
@@ -119,14 +153,14 @@ def phase_05_permutations(domain, subdomains, outdir):
         for sub in subdomains:
             perms.add(p + sub)
     perms = list(perms)
-    save_json(perms, f"{outdir}/phase_05_permutations_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_05_permutations", perms, outdir)
     print(f"{G}[✅] Phase 5 complete.{RS}")
     return perms
 
 # ---------- Phase 6 ----------
 def phase_06_ct_logs(domain, outdir):
     print(f"{B}[🔵] Phase 6: CT Logs{RS}")
-    save_json([], f"{outdir}/phase_06_ct_logs_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_06_ct_logs", [], outdir)
     print(f"{G}[✅] Phase 6 complete.{RS}")
 
 # ---------- Phase 7 ----------
@@ -147,7 +181,7 @@ def phase_07_dns_takeover(domain, subdomains, outdir):
             results[sub] = {'ip': ip, 'cname': None, 'takeover': False}
         except:
             pass
-    save_json(results, f"{outdir}/phase_07_dns_takeover_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_07_dns_takeover", results, outdir)
     print(f"{G}[✅] Phase 7 complete.{RS}")
     return results
 
@@ -163,19 +197,19 @@ def phase_08_cloud_buckets(domain, outdir):
                 buckets.append(url)
         except:
             pass
-    save_json(buckets, f"{outdir}/phase_08_cloud_buckets_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_08_cloud_buckets", buckets, outdir)
     print(f"{G}[✅] Phase 8 complete.{RS}")
 
 # ---------- Phase 9 ----------
 def phase_09_github_search(domain, outdir):
     print(f"{B}[🔵] Phase 9: GitHub Search{RS}")
-    save_json([], f"{outdir}/phase_09_github_search_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_09_github_search", [], outdir)
     print(f"{G}[✅] Phase 9 complete.{RS}")
 
 # ---------- Phase 10 ----------
 def phase_10_emails(domain, outdir):
     print(f"{B}[🔵] Phase 10: Email Enumeration{RS}")
-    save_json([], f"{outdir}/phase_10_emails_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_10_emails", [], outdir)
     print(f"{G}[✅] Phase 10 complete.{RS}")
 
 # ---------- Phase 11 ----------
@@ -213,7 +247,7 @@ def phase_11_open_ports(domain, ips, outdir):
             results[ip] = sorted(open_ports)
         else:
             print(f"{Y}[!] No open ports on {ip}{RS}")
-    save_json(results, f"{outdir}/phase_11_open_ports_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_11_open_ports", results, outdir)
     print(f"{G}[✅] Phase 11 complete.{RS}")
     return results
 
@@ -230,7 +264,7 @@ def phase_12_vhosts(domain, subdomains, open_ports, outdir):
                     vhosts.append(url)
             except:
                 pass
-    save_json(vhosts, f"{outdir}/phase_12_vhosts_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_12_vhosts", vhosts, outdir)
     print(f"{G}[✅] Phase 12 complete.{RS}")
 
 # ---------- Phase 13 ----------
@@ -247,8 +281,10 @@ def phase_13_http_probing(domain, subdomains, open_ports, outdir):
     for sub in subdomains[:20]:
         for port in ports:
             for proto in ['http','https']:
-                if port == 443 and proto == 'http': continue
-                if port == 80 and proto == 'https': continue
+                if port == 443 and proto == 'http':
+                    continue
+                if port == 80 and proto == 'https':
+                    continue
                 url = f"{proto}://{sub}:{port}" if port not in [80,443] else f"{proto}://{sub}"
                 try:
                     r = requests.get(url, timeout=3, allow_redirects=True, verify=False)
@@ -256,7 +292,7 @@ def phase_13_http_probing(domain, subdomains, open_ports, outdir):
                     print(f"{G}[+] {url} -> {r.status_code}{RS}")
                 except:
                     pass
-    save_json(results, f"{outdir}/phase_13_probe_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_13_probe", results, outdir)
     print(f"{G}[✅] Phase 13 complete.{RS}")
     return results
 
@@ -267,27 +303,27 @@ def phase_14_tech_fingerprint(domain, probe_results, outdir):
     for res in probe_results:
         if res.get('server'):
             tech[res['url']] = {'server': res['server']}
-    save_json(tech, f"{outdir}/phase_14_tech_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_14_tech", tech, outdir)
     print(f"{G}[✅] Phase 14 complete.{RS}")
     return tech
 
 # ---------- Phase 15 ----------
 def phase_15_takeover_confirm(domain, dns_results, outdir):
     print(f"{B}[🔵] Phase 15: Takeover Confirm{RS}")
-    save_json([], f"{outdir}/phase_15_takeover_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_15_takeover", [], outdir)
     print(f"{G}[✅] Phase 15 complete.{RS}")
 
 # ---------- Phase 16 ----------
 def phase_16_cve_recon(domain, tech_data, outdir):
     print(f"{B}[🔵] Phase 16: CVE Recon{RS}")
-    save_json([], f"{outdir}/phase_16_cve_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_16_cve", [], outdir)
     print(f"{G}[✅] Phase 16 complete.{RS}")
 
 # ---------- Phase 17 ----------
 def phase_17_cors_graphql_favicon(domain, live_urls, outdir):
     print(f"{B}[🔵] Phase 17: CORS/GraphQL/Favicon{RS}")
     graphql = [u for u in live_urls if '/graphql' in u or '/api/graphql' in u]
-    save_json({'graphql': graphql}, f"{outdir}/phase_17_cors_graphql_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_17_cors_graphql", {'graphql': graphql}, outdir)
     print(f"{G}[✅] Phase 17 complete.{RS}")
 
 # ---------- Phase 18 ----------
@@ -303,7 +339,7 @@ def phase_18_wayback_historical(domain, outdir):
                 print(f"{G}[+] Found {len(urls)} historical URLs{RS}")
     except:
         pass
-    save_json(urls, f"{outdir}/phase_18_wayback_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_18_wayback", urls, outdir)
     print(f"{G}[✅] Phase 18 complete.{RS}")
     return urls
 
@@ -333,14 +369,16 @@ def phase_18_5_katana(domain, outdir, existing_urls):
         print(f"{R}[!] Katana timed out.{RS}")
     except Exception as e:
         print(f"{R}[!] Katana error: {e}{RS}")
-    save_json(existing_urls, f"{outdir}/phase_18_combined_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    with open(f"{outdir}/phase_18_combined_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt", 'w') as f:
+        for url in existing_urls:
+            f.write(url + "\n")
     return existing_urls
 
 # ---------- Phase 19 ----------
 def phase_19_js_deep_dive(domain, live_urls, historical_urls, outdir):
     print(f"{B}[🔵] Phase 19: JS Deep Dive{RS}")
     js_files = [u for u in (live_urls + historical_urls[:100]) if u.endswith('.js')]
-    save_json(js_files, f"{outdir}/phase_19_js_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_19_js", js_files, outdir)
     print(f"{G}[✅] Phase 19 complete.{RS}")
     return js_files
 
@@ -354,7 +392,7 @@ def phase_20_sourcemaps(domain, js_extracts, outdir):
                 maps.append(js + '.map')
         except:
             pass
-    save_json(maps, f"{outdir}/phase_20_sourcemaps_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_20_sourcemaps", maps, outdir)
     print(f"{G}[✅] Phase 20 complete.{RS}")
 
 # ---------- Phase 21 ----------
@@ -372,7 +410,7 @@ def phase_21_url_fuzzing(domain, live_urls, outdir):
                     print(f"{G}[+] Found: {url}{RS}")
             except:
                 pass
-    save_json(found, f"{outdir}/phase_21_fuzzing_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_21_fuzzing", found, outdir)
     print(f"{G}[✅] Phase 21 complete.{RS}")
 
 # ---------- Phase 22 ----------
@@ -386,13 +424,13 @@ def phase_22_parameters(domain, urls, outdir):
                 if '=' in param:
                     key = param.split('=')[0]
                     params.setdefault(url, []).append(key)
-    save_json(params, f"{outdir}/phase_22_params_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_22_params", params, outdir)
     print(f"{G}[✅] Phase 22 complete.{RS}")
 
 # ---------- Phase 23 ----------
 def phase_23_screenshots(domain, live_urls, outdir):
     print(f"{B}[🔵] Phase 23: Screenshots{RS}")
-    save_json([], f"{outdir}/phase_23_screenshots_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_23_screenshots", [], outdir)
     print(f"{G}[✅] Phase 23 complete.{RS}")
 
 # ---------- Phase 24 ----------
@@ -405,26 +443,35 @@ def phase_24_live_validation(domain, urls, outdir):
                 valid.append(url)
         except:
             pass
-    save_json(valid, f"{outdir}/phase_24_live_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_24_live", valid, outdir)
     print(f"{G}[✅] Phase 24 complete.{RS}")
 
 # ---------- Phase 25 ----------
 def phase_25_dedup(domain, master_data, outdir):
     print(f"{B}[🔵] Phase 25: Deduplication{RS}")
-    save_json(master_data, f"{outdir}/phase_25_dedup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_25_dedup", master_data, outdir)
     print(f"{G}[✅] Phase 25 complete.{RS}")
 
 # ---------- Phase 26 ----------
 def phase_26_enrichment(domain, master_data, outdir):
     print(f"{B}[🔵] Phase 26: Enrichment{RS}")
-    save_json(master_data, f"{outdir}/phase_26_enrich_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_26_enrich", master_data, outdir)
     print(f"{G}[✅] Phase 26 complete.{RS}")
 
 # ---------- Phase 27 ----------
 def phase_27_report(domain, master_data, outdir):
     print(f"{B}[🔵] Phase 27: Report Generation{RS}")
     with open(f"{outdir}/report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt", 'w') as f:
-        f.write(f"ANUBIS Report for {domain}\n{json.dumps(master_data, indent=2)}")
+        f.write(f"ANUBIS Report for {domain}\n")
+        for key, value in master_data.items():
+            if isinstance(value, list):
+                f.write(f"\n{key}: ({len(value)} items)\n")
+                for item in value[:20]:
+                    f.write(f"  - {item}\n")
+                if len(value) > 20:
+                    f.write(f"  ... and {len(value)-20} more\n")
+            else:
+                f.write(f"{key}: {value}\n")
     print(f"{G}[✅] Phase 27 complete.{RS}")
 
 # ---------- Phase 28 ----------
@@ -442,9 +489,10 @@ def phase_29_nuclei(domain, urls, outdir):
         return
     url_file = f"{outdir}/nuclei_urls_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
     with open(url_file, 'w') as f:
-        f.write('\n'.join(urls[:10]))
+        for url in urls:
+            f.write(url + "\n")
     try:
-        subprocess.run(['nuclei', '-l', url_file, '-severity', 'critical,high,medium', '-o', f"{outdir}/nuclei_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"], timeout=60)
+        subprocess.run(['nuclei', '-l', url_file, '-severity', 'critical,high,medium', '-o', f"{outdir}/nuclei_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"])
         print(f"{G}[+] Nuclei scan completed.{RS}")
     except Exception as e:
         print(f"{R}[!] Nuclei error: {e}{RS}")
@@ -474,21 +522,20 @@ def phase_30_ssl_scan(domain, outdir):
                     result["vulns"].append("Certificate expires in less than 30 days")
     except Exception as e:
         result["cert"]["error"] = str(e)
-    # ciphers
     output = run_cmd(f"openssl s_client -connect {domain}:443 -ciphers 'ALL:eNULL' -tls1_2 </dev/null 2>/dev/null | grep -E 'Cipher|Protocol'", 10)
     if output:
         result["ciphers"] = output.strip().splitlines()
-    # heartbeat
     if "heartbeat" in run_cmd(f"openssl s_client -connect {domain}:443 -heartbeat -tlsextdebug </dev/null 2>&1 | grep -i heartbeat", 10).lower():
         result["vulns"].append("Heartbleed may be present")
-    save_json(result, f"{outdir}/phase_30_ssl_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_30_ssl", result, outdir)
     print(f"{G}[✅] Phase 30 complete.{RS}")
     return result
 
 # ---------- Phase 31 ----------
 def phase_31_security_headers(domain, outdir):
     print(f"{B}[🔵] Phase 31: Security Headers{RS}")
-    results = {}; grades = {"A":0,"B":0,"C":0,"D":0,"F":0}
+    results = {}
+    grades = {"A":0, "B":0, "C":0, "D":0, "F":0}
     headers_to_check = ["Strict-Transport-Security","Content-Security-Policy","X-Frame-Options","X-Content-Type-Options","Referrer-Policy","Permissions-Policy"]
     for proto in ["http","https"]:
         url = f"{proto}://{domain}"
@@ -504,7 +551,7 @@ def phase_31_security_headers(domain, outdir):
             results[url] = {"error": str(e)}
             print(f"{R}[!] {url} failed: {e}{RS}")
     output = {"domain": domain, "results": results, "grades": grades}
-    save_json(output, f"{outdir}/phase_31_headers_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_31_headers", output, outdir)
     print(f"{G}[✅] Phase 31 complete.{RS}")
     return output
 
@@ -527,7 +574,7 @@ def phase_32_axfr(domain, outdir):
                 print(f"{Y}[!] AXFR failed from {ns}{RS}")
     except Exception as e:
         results["error"] = str(e)
-    save_json(results, f"{outdir}/phase_32_axfr_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_32_axfr", results, outdir)
     print(f"{G}[✅] Phase 32 complete.{RS}")
     return results
 
@@ -535,7 +582,12 @@ def phase_32_axfr(domain, outdir):
 def phase_33_cloud_metadata(domain, outdir):
     print(f"{B}[🔵] Phase 33: Cloud Metadata{RS}")
     results = {"domain": domain, "metadata": {}, "accessible": False}
-    endpoints = {"AWS": "http://169.254.169.254/latest/meta-data/", "GCP": "http://169.254.169.254/computeMetadata/v1/", "Azure": "http://169.254.169.254/metadata/instance?api-version=2017-08-01", "OVH": "http://169.254.169.254/ovh/"}
+    endpoints = {
+        "AWS": "http://169.254.169.254/latest/meta-data/",
+        "GCP": "http://169.254.169.254/computeMetadata/v1/",
+        "Azure": "http://169.254.169.254/metadata/instance?api-version=2017-08-01",
+        "OVH": "http://169.254.169.254/ovh/"
+    }
     for prov, url in endpoints.items():
         try:
             h = {"Metadata-Flavor": "Google"} if prov == "GCP" else {}
@@ -548,7 +600,7 @@ def phase_33_cloud_metadata(domain, outdir):
                 print(f"{Y}[!] {prov} not accessible (status {r.status_code}){RS}")
         except Exception as e:
             print(f"{R}[!] {prov} error: {e}{RS}")
-    save_json(results, f"{outdir}/phase_33_cloud_metadata_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_33_cloud_metadata", results, outdir)
     print(f"{G}[✅] Phase 33 complete.{RS}")
     return results
 
@@ -568,7 +620,7 @@ def phase_34_git_leak(domain, outdir):
                     print(f"{Y}[-] {url} -> {r.status_code}{RS}")
             except Exception as e:
                 print(f"{R}[!] {url} error: {e}{RS}")
-    save_json(results, f"{outdir}/phase_34_git_leak_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_34_git_leak", results, outdir)
     print(f"{G}[✅] Phase 34 complete.{RS}")
     return results
 
@@ -597,7 +649,7 @@ def phase_35_s3_permissions(domain, outdir):
         except Exception as e:
             print(f"{R}[!] {url} error: {e}{RS}")
             results["buckets"].append({"bucket": name, "url": url, "status": "error", "error": str(e)})
-    save_json(results, f"{outdir}/phase_35_s3_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_35_s3", results, outdir)
     print(f"{G}[✅] Phase 35 complete.{RS}")
     return results
 
@@ -624,7 +676,7 @@ def phase_36_graphql_introspection(domain, outdir):
                         print(f"{Y}[-] {url} -> {r.status_code} (no introspection){RS}")
             except Exception as e:
                 print(f"{R}[!] {url} error: {e}{RS}")
-    save_json(results, f"{outdir}/phase_36_graphql_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_36_graphql", results, outdir)
     print(f"{G}[✅] Phase 36 complete.{RS}")
     return results
 
@@ -639,26 +691,22 @@ def phase_37_jwt_scanner(domain, outdir):
             url = f"{proto}://{domain}{path}"
             try:
                 r = requests.get(url, timeout=5, verify=False, allow_redirects=True)
-                # Header
                 auth = r.headers.get("Authorization", "")
                 if "Bearer " in auth:
                     token = auth.split("Bearer ")[1].strip()
                     if token.startswith("eyJ"):
                         results["tokens"].append({"url": url, "source": "Authorization header", "token": token})
                         print(f"{G}[+] JWT in Authorization header at {url}{RS}")
-                # Cookie
                 for cookie in r.cookies:
                     if "eyJ" in cookie.value:
                         results["tokens"].append({"url": url, "source": "Cookie", "token": cookie.value})
                         print(f"{G}[+] JWT in cookie at {url}{RS}")
-                # Body
                 matches = re.findall(r"eyJ[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+\.[a-zA-Z0-9_-]+", r.text)
                 for token in matches:
                     results["tokens"].append({"url": url, "source": "Response body", "token": token})
                     print(f"{G}[+] JWT in response body at {url}{RS}")
             except Exception as e:
                 print(f"{R}[!] {url} error: {e}{RS}")
-    # Decode
     for entry in results["tokens"]:
         try:
             parts = entry["token"].split(".")
@@ -673,7 +721,7 @@ def phase_37_jwt_scanner(domain, outdir):
                     print(f"{R}[!] Critical: alg=none found in token from {entry['url']}{RS}")
         except Exception as e:
             entry["decode_error"] = str(e)
-    save_json(results, f"{outdir}/phase_37_jwt_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_37_jwt", results, outdir)
     print(f"{G}[✅] Phase 37 complete.{RS}")
     return results
 
@@ -696,7 +744,7 @@ def phase_38_cors_reflection(domain, outdir):
                         results["endpoints"].append({"url": url, "origin": origin, "Access-Control-Allow-Origin": acao, "vulnerable": False})
                 except Exception as e:
                     print(f"{R}[!] {url} error: {e}{RS}")
-    save_json(results, f"{outdir}/phase_38_cors_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_38_cors", results, outdir)
     print(f"{G}[✅] Phase 38 complete.{RS}")
     return results
 
@@ -721,7 +769,7 @@ def phase_39_rate_limit(domain, outdir):
             else:
                 print(f"{Y}[-] No rate limiting at {url} (statuses: {set(codes)}){RS}")
                 results["endpoints"].append({"url": url, "statuses": codes, "rate_limited": False})
-    save_json(results, f"{outdir}/phase_39_rate_limit_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_39_rate_limit", results, outdir)
     print(f"{G}[✅] Phase 39 complete.{RS}")
     return results
 
@@ -750,7 +798,7 @@ def phase_40_email_security(domain, outdir):
             print(f"{G}[+] DKIM found for selector {sel}: {dkim[0]}{RS}")
         else:
             print(f"{Y}[-] No DKIM for selector {sel}{RS}")
-    save_json(results, f"{outdir}/phase_40_email_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+    save_output(domain, "phase_40_email", results, outdir)
     print(f"{G}[✅] Phase 40 complete.{RS}")
     return results
 
@@ -767,7 +815,6 @@ def main():
     print(f"{C}[🎯] Target: {domain}{RS}")
     print(f"{C}[⚡] Running FULL pipeline (Phases 1-40).{RS}")
 
-    # If single phase requested
     if args.phase:
         phase_map = {
             1: phase_01_whois, 2: phase_02_asn, 3: phase_03_passive_subdomain, 4: phase_04_bruteforce,
