@@ -1,60 +1,61 @@
+☥ SHADOW SCANNING. ABSOLUTE PRECISION. ⚡
+🏛️ ANUBIS RECON ENGINE v2.1 🏛️
+⚡ Crafted by: Obito Uchiha [ h4ck3r ] | ANUBIS Protocol ⚡
+
+text
+
 # ☥ ANUBIS – Shadow Scanning. Absolute Precision.
 
-![ANUBIS Banner](./anubis_v2.webp)
-
-**ANUBIS is a 40‑phase reconnaissance engine for Bug Bounty & VAPT.**  
-It automates the entire recon pipeline – from WHOIS to SSL/TLS, CORS, JWT, email security, and more – giving you a prioritized attack surface in minutes.
-
-🚀 **Built for speed, precision, and stealth.**  
-🔍 **Covers 100% of the modern recon workflow** – 40 phases, no skips.
+**ANUBIS** is a **40‑phase reconnaissance engine** for Bug Bounty & VAPT.  
+It automates the entire recon pipeline – from WHOIS to SSL/TLS, CORS, JWT, email security – giving you a prioritized attack surface in minutes.
 
 ---
 
-## ✨ Features – 40 Phases Explained (Like You're 5)
+## ✨ Features – 40 Phases Explained
 
 | Phase | What It Does | Why It Matters |
 |-------|--------------|----------------|
-| **1 – WHOIS** | Fetches domain registration details (who owns it, when it expires). | Find out who is behind the domain and when it might drop. |
-| **2 – ASN & Netblock** | Finds the hosting provider (e.g., AWS, Google Cloud) and IP range. | Know where the target lives so you can hunt nearby infrastructure. |
-| **3 – Passive Subdomains** | Uses Subfinder and crt.sh to find subdomains without touching the target. | Discover hidden apps (like `admin.target.com`) silently. |
-| **4 – Active Brute‑Force** | Guesses common subdomains (like `mail`, `api`, `dev`) using a huge wordlist. | Find subdomains that are not in public logs. |
-| **5 – DNS Permutations** | Mutates found subdomains (e.g., `admin` → `dev-admin`). | Catch even more hidden subdomains. |
-| **6 – Certificate Logs** | Checks public SSL certificate logs for subdomains. | Subdomains often show up in SSL certs before they go live. |
-| **7 – DNS + Takeover** | Resolves all subdomains to IPs and checks if any are vulnerable to takeover. | Find "dangling" subdomains you can hijack (critical bug). |
-| **8 – Cloud Buckets** | Scans for open cloud storage (S3, Azure, GCP) linked to the domain. | Exposed buckets often leak confidential files. |
-| **9 – GitHub Search** | Searches GitHub for secrets, configs, and internal code references. | Hardcoded passwords and API keys are a goldmine. |
-| **10 – Emails** | Enumerates emails associated with the domain. | Use these for phishing tests or to find employee accounts. |
-| **11 – Port Scanning** | Scans for open TCP ports (top 1000) on all discovered IPs. | Find unconventional entry points (SSH, FTP, databases). |
-| **12 – Virtual Hosts** | Tests the Host header on IP:Port to find hidden virtual hosts. | Access internal services that aren't linked to a subdomain. |
-| **13 – HTTP Probing** | Sends HTTP/S requests to every subdomain/IP to check if they are alive. | Separate live targets from dead ones. |
-| **14 – Tech Fingerprinting** | Detects web servers, languages (PHP, Python), and frameworks (WordPress, React). | Know the tech stack to pick the right exploits. |
-| **15 – Takeover Confirm** | Verifies if the takeover risk is real (CNAME points to a dead service). | Confirmed takeovers are easy bug bounty wins. |
-| **16 – CVE Recon** | Matches detected tech against a lightweight CVE database. | Find known vulnerabilities in the software they use. |
-| **17 – CORS/GraphQL/Favicon** | Checks CORS misconfigurations, enables GraphQL introspection, and grabs favicon hashes. | CORS misconfigs steal sessions; GraphQL exposes the whole API schema. |
-| **18 – Wayback URLs** | Pulls historical URLs from the Wayback Machine. | Find old, forgotten endpoints that are still alive and vulnerable. |
-| **18.5 – Katana** | *(Optional)* Actively crawls the target to find fresh, dynamic URLs. | Discover endpoints not archived anywhere else. |
-| **19 – JS Deep Dive** | Downloads and parses JavaScript files to find endpoints, secrets, and parameters. | JS files are full of hidden API routes and keys. |
-| **20 – Sourcemaps** | Fetches `.js.map` files to reveal original, unminified source code. | Read the original code to find bugs easily. |
-| **21 – URL Fuzzing** | Bruteforces common paths (`/admin`, `/api`, `/env`, `/.git`). | Find hidden dashboards and sensitive files. |
-| **22 – Parameter Discovery** | Extracts GET/POST parameters from URLs. | Parameters are where injection bugs (SQLi, XSS) live. |
-| **23 – Screenshots** | Takes screenshots of live pages (requires `gowitness`). | Visually inspect targets without opening a browser. |
-| **24 – Live Validation** | Filters out dead links and flags high‑priority targets. | Focus only on what's actually working. |
-| **25 – Deduplication** | Merges all the collected data and removes duplicates. | Clean, organized data is easier to analyze. |
-| **26 – Enrichment Loop** | Re‑runs enrichment phases (18–24) to catch anything missed the first time. | Ensure you haven't missed any low-hanging fruit. |
-| **27 – Report Generation** | Generates reports in JSON, Markdown, and HTML. | Share findings with your team or clients easily. |
-| **28 – Audit Trail** | Creates SHA‑256 hashes of all output files for integrity checks. | Prove your reports haven't been tampered with. |
-| **29 – Nuclei** | *(Optional)* Runs active exploit payloads (LFI, SQLi, RCE) on discovered URLs. | Find critical vulnerabilities automatically (use with permission!). |
-| **30 – SSL/TLS Deep Scan** | Checks certificate expiry, weak ciphers, and the Heartbleed vulnerability. | Find SSL misconfigurations that lead to MITM attacks. |
-| **31 – Security Headers** | Audits HSTS, CSP, X‑Frame‑Options, and other security headers. | Missing headers make the site vulnerable to clickjacking and XSS. |
-| **32 – DNS AXFR** | Attempts a DNS zone transfer against all NS servers. | If it works, you get the entire DNS database in one shot (classic win). |
-| **33 – Cloud Metadata** | Probes the internal cloud metadata endpoint (169.254.169.254). | If the target is in the cloud, you might steal IAM credentials. |
-| **34 – Git Leak** | Checks for exposed `.git` folders (`/.git/config`, `/.git/HEAD`). | Leak the entire source code of the website. |
-| **35 – S3 Permissions** | Tests if S3 buckets are publicly readable or writable. | Public write permissions mean you can deface the site or host malware. |
-| **36 – GraphQL Introspection** | Extracts the full GraphQL schema. | Understand the entire API and find dangerous queries. |
-| **37 – JWT Weakness** | Tests JWT tokens for `alg=none`, weak HMAC secrets, and `kid` injection. | Bypass authentication completely. |
-| **38 – CORS Reflection** | Sends requests with `Origin: evil.com` and checks if it's reflected. | Steal user sessions via XSS if CORS is misconfigured. |
-| **39 – Rate Limiting** | Sends 10 rapid requests to login/OTP endpoints. | If no 429/403, the endpoint is vulnerable to brute‑force attacks. |
-| **40 – Email Security** | Queries SPF, DKIM, and DMARC records. | Misconfigured email policies allow attackers to spoof emails from your domain. |
+| 1 – WHOIS | Fetches domain registration details | Find out who owns the domain |
+| 2 – ASN & Netblock | Finds hosting provider and IP range | Hunt nearby infrastructure |
+| 3 – Passive Subdomains | Subfinder + crt.sh | Discover hidden apps silently |
+| 4 – Active Brute‑Force | Guesses common subdomains | Find subdomains not in public logs |
+| 5 – DNS Permutations | Mutates found subdomains | Catch even more |
+| 6 – Certificate Logs | Checks SSL cert logs | Subdomains appear in certs early |
+| 7 – DNS + Takeover | Resolves subdomains, checks takeover | Find dangling subdomains you can hijack |
+| 8 – Cloud Buckets | Scans S3, Azure, GCP | Exposed buckets leak files |
+| 9 – GitHub Search | Searches GitHub for secrets/configs | Hardcoded passwords are gold |
+| 10 – Emails | Enumerates emails | For phishing or employee accounts |
+| 11 – Port Scanning | Top 25 TCP ports | Find unconventional entry points |
+| 12 – Virtual Hosts | Tests Host header | Access internal services |
+| 13 – HTTP Probing | Checks if hosts are alive | Separate live from dead |
+| 14 – Tech Fingerprinting | Detects web servers, languages | Pick the right exploits |
+| 15 – Takeover Confirm | Verifies CNAME takeover risks | Easy bug bounty wins |
+| 16 – CVE Recon | Matches tech against CVE DB | Known vulnerabilities |
+| 17 – CORS/GraphQL/Favicon | Misconfigs, introspection, favicon hashes | Steal sessions or expose APIs |
+| 18 – Wayback URLs | Pulls historical URLs | Old, forgotten endpoints |
+| 18.5 – Katana | (Optional) Active crawl | Discover fresh, dynamic URLs |
+| 19 – JS Deep Dive | Parses JavaScript for endpoints/secrets | Hidden routes and keys |
+| 20 – Sourcemaps | Fetches .js.map files | Read unminified code |
+| 21 – URL Fuzzing | Bruteforces common paths | Hidden dashboards, sensitive files |
+| 22 – Parameter Discovery | Extracts GET/POST parameters | Injection bugs live here |
+| 23 – Screenshots | Takes screenshots (gowitness) | Visual inspection |
+| 24 – Live Validation | Filters dead links, flags high‑priority | Focus on what matters |
+| 25 – Deduplication | Merges and removes duplicates | Clean, organised data |
+| 26 – Enrichment Loop | Re‑runs phases 18–24 | Catch anything missed |
+| 27 – Report Generation | JSON, Markdown, HTML | Share findings |
+| 28 – Audit Trail | SHA‑256 hashes of all output | Prove integrity |
+| 29 – Nuclei | (Optional) Active exploit scanning | Critical vulnerabilities |
+| 30 – SSL/TLS Deep Scan | Certificate expiry, weak ciphers, Heartbleed | SSL misconfigurations |
+| 31 – Security Headers | HSTS, CSP, X‑Frame‑Options, etc. | Missing headers = clickjacking/XSS |
+| 32 – DNS AXFR | Attempts zone transfer | Classic win if successful |
+| 33 – Cloud Metadata | Probes 169.254.169.254 | Steal IAM credentials |
+| 34 – Git Leak | Checks exposed .git folders | Leak entire source code |
+| 35 – S3 Permissions | Tests if buckets are public | Deface or host malware |
+| 36 – GraphQL Introspection | Extracts full schema | Find dangerous queries |
+| 37 – JWT Weakness | Tests alg=none, weak secrets | Bypass authentication |
+| 38 – CORS Reflection | Sends Origin: evil.com | Steal sessions via XSS |
+| 39 – Rate Limiting | 10 rapid requests to login/OTP | If no 429/403 → brute‑force |
+| 40 – Email Security | SPF, DKIM, DMARC | Prevent email spoofing |
 
 ---
 
@@ -66,59 +67,74 @@ cd ANUBIS
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-Optional tools (for enhanced results):
-subfinder, katana, nuclei, theHarvester, waybackurls, gowitness – install them via go install or apt as needed.
+(Optional) Global command – run anubis from anywhere
+bash
+echo '#!/bin/bash' > ~/anubis
+echo 'cd ~/ANUBIS && source venv/bin/activate && python3 anubis.py "$@"' >> ~/anubis
+chmod +x ~/anubis
+sudo mv ~/anubis /usr/local/bin/anubis
+Now you can run:
+
+bash
+anubis -d target.com
+from any folder in the terminal.
 
 🚀 Usage
 Full pipeline (all 40 phases)
 bash
-python anubis.py -d target.com
-Run a single phase (for testing/debugging)
+python3 anubis.py -d target.com
+or (if you set up the global alias):
+
 bash
-python anubis.py -d target.com --phase 5
-Enable Nuclei scan (Phase 29 – you'll be prompted)
+anubis -d target.com
+Run a single phase
 bash
-python anubis.py -d target.com --nuclei
-Note: Nuclei sends real exploit payloads – you'll be asked to confirm before it runs.
+python3 anubis.py -d target.com --phase 5
+Enable Nuclei (Phase 29)
+You'll be prompted during the scan:
+
+text
+Continue to Phase 29? (y/N):
+Type y to run Nuclei (sends real payloads – use with permission).
 
 ⚠️ Warnings
-Nuclei scan sends real payloads (LFI, SQLi, RCE). Only run on targets you own or have explicit permission to test.
+Nuclei sends real exploit payloads (LFI, SQLi, RCE). Only run on targets you own or have explicit permission.
 
-Running this tool against production systems without authorization is illegal and unethical.
+Running this tool against production systems without authorisation is illegal and unethical.
 
 The tool uses public APIs and DNS resolution – it does not send intrusive payloads by default.
 
 📂 Output Structure
-All results are saved to output/<target>/:
+All results are saved as human‑readable TXT files in output/<target>/:
 
 text
 output/
 └── target.com/
-    ├── phase_01_whois_*.json
-    ├── phase_02_asn_*.json
+    ├── phase_01_whois_*.txt
+    ├── phase_02_asn_*.txt
     ├── ...
-    ├── phase_40_email_*.json
+    ├── phase_40_email_*.txt
     ├── report_*.txt
     ├── audit_*.txt
     └── nuclei_results_*.txt (if run)
 🤝 Contributing
-Pull requests and issues are welcome. Please ensure your code follows the existing style and passes basic tests.
+Pull requests and issues are welcome. Please follow the existing code style and test your changes.
 
 📄 License
 MIT License – see LICENSE for details.
 
-⚡ Crafted by
+⚡ Crafted byYour honest feedback is highly appreciated.
+
+"Shadow scanning. Absolute precision."
 Obito Uchiha [ h4ck3r ] – Bug Hunter | Red Teamer | Open‑Source Enthusiast
 
 "Shadow scanning. Absolute precision."
 
 📢 Feedback & Future Improvements
-This is ANUBIS v2.0 – we're actively working on more accuracy, clarity, and optimization.
+This is ANUBIS v2.1 – we're actively working on more accuracy, clarity, and optimisation.
 
 If you encounter any issues, have suggestions, or want to report a bug, please open an issue.
-Your honest feedback is highly appreciated and will help shape the next versions.
 
-"Shadow scanning. Absolute precision."
-Your honest feedback is highly appreciated and will help shape the next versions.
+Your honest feedback is highly appreciated.
 
 "Shadow scanning. Absolute precision."
