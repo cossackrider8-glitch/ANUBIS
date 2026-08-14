@@ -3,7 +3,8 @@
 </p>
 
 🏛️ ANUBIS RECON ENGINE v2.1 🏛️
-⚡ Crafted by: Obito Uchiha [ h4ck3r ] | ANUBIS Protocol ⚡
+Crafted by  
+⚡Obito Uchiha [ h4ck3r ] – Bug Hunter | Red Teamer | Open‑Source Enthusiast⚡
 
 
 # ☥ ANUBIS – Shadow Scanning. Absolute Precision.
