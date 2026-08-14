@@ -1,4 +1,7 @@
-☥ SHADOW SCANNING. ABSOLUTE PRECISION. ⚡
+<p align="center">
+  <img src="https://raw.githubusercontent.com/cossackrider8-glitch/ANUBIS/main/Anubis_v2.1.webp" alt="ANUBIS Banner" width="800">
+</p>
+
 🏛️ ANUBIS RECON ENGINE v2.1 🏛️
 ⚡ Crafted by: Obito Uchiha [ h4ck3r ] | ANUBIS Protocol ⚡
 
