@@ -219,3 +219,6 @@ __marimo__/
 output/
 __pycache__/
 *.pyc
+dirsearch/
+*.tar.gz
+*.bak
