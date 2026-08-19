@@ -795,7 +795,11 @@ def main():
     parser = argparse.ArgumentParser(description="ANUBIS Recon Engine")
     parser.add_argument("-d", "--domain", required=True, help="Target domain")
     parser.add_argument("--phase", type=int, help="Run only a specific phase")
-    args = parser.parse_args()
+    parser.add_argument("--github-token", help="GitHub Personal Access Token (for TruffleHog)")
+        args = parser.parse_args()
+    if args.github_token:
+        os.environ["GITHUB_TOKEN"] = args.github_token
+
     domain = args.domain
     outdir = f"output/{domain}"
     os.makedirs(outdir, exist_ok=True)
