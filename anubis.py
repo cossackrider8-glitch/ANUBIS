@@ -123,7 +123,7 @@ def phase_03_passive_subdomain(domain, outdir):
         tools.append(("subfinder", f"subfinder -d {domain} -silent"))
     if is_tool_installed("sublist3r"):
         tools.append(("sublist3r", f"sublist3r -d {domain} -o /tmp/sublist3r_{domain}.txt && cat /tmp/sublist3r_{domain}.txt"))
-    tools.append(("crt.sh", f"curl -s 'https://crt.sh/?q=%25.{domain}&output=json' | jq -r '.[].name_value' 2>/dev/null | sed 's/\\*\\.//g' | sort -u"))
+    tools.append(("crt.sh", f"curl -s --max-time 30 'https://crt.sh/?q=%25.{domain}curl -s 'https://crt.sh/?q=%25.{domain}&output=json'output=json' | jq -r '.[].name_value' 2>/dev/null | sed 's/\\*\\.//g' | sort -u"))
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     async def run_tool(name, cmd):
