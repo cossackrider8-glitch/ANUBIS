@@ -85,7 +85,23 @@ def is_tool_installed(name):
 # =========================== PHASE 1 ===========================
 def phase_01_whois(domain, outdir):
     print(f"{B}[🔵] Phase 1: WHOIS{RS}")
-    save_output(domain, "phase_01_whois", {"raw": run_cmd(f"whois {domain}", 10)}, outdir)
+    import whois, subprocess
+    raw = ""
+    # Try python-whois library first
+    try:
+        w = whois.whois(domain)
+        raw = str(w)
+    except Exception as e:
+        # Fallback to system whois command (with stderr suppressed)
+        try:
+            result = subprocess.run(["whois", domain], capture_output=True, text=True, timeout=10)
+            if result.stdout:
+                raw = result.stdout
+            else:
+                raw = f"Error (both methods failed): {e}"
+        except Exception as e2:
+            raw = f"Error: {e2}"
+    save_output(domain, "phase_01_whois", {"raw": raw}, outdir)
     print(f"{G}[✅] Phase 1 complete.{RS}")
 
 # =========================== PHASE 2 ===========================
