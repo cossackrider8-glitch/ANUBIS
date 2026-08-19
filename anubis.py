@@ -3,6 +3,15 @@ import sys, os, json, requests, socket, concurrent.futures, subprocess, time, ar
 from datetime import datetime
 from urllib.parse import urlparse
 import warnings
+import select
+def input_with_timeout(prompt, timeout):
+    print(prompt, end="", flush=True)
+    ready, _, _ = select.select([sys.stdin], [], [], timeout)
+    if ready:
+        return sys.stdin.readline().strip().lower()
+    else:
+        print("\n[!] No input detected. Skipping Katana.")
+        return "n"
 warnings.filterwarnings("ignore")
 
 # =========================== COLOURS ===========================
@@ -89,7 +98,7 @@ def phase_01_whois(domain, outdir):
     raw = ""
     # Try python-whois library first
     try:
-        w = whois.whois(domain)
+        w = whois.whois(domain, ignore_err=True)
         raw = str(w)
     except Exception as e:
         # Fallback to system whois command (with stderr suppressed)
@@ -260,7 +269,7 @@ def phase_09_github_search(domain, outdir):
     secrets = []
     if is_tool_installed("trufflehog"):
         try:
-            subprocess.run(f"trufflehog github --org={domain} -o json > {outdir}/trufflehog_{domain}.json", shell=True, timeout=60)
+            subprocess.run(f"trufflehog github --org={domain} --json > {outdir}/trufflehog_{domain}.json", shell=True, timeout=60)
             with open(f"{outdir}/trufflehog_{domain}.json", 'r') as f:
                 secrets = f.readlines()
         except:
@@ -401,7 +410,7 @@ def phase_18_wayback_historical(domain, outdir):
     if is_tool_installed("waybackurls"):
         tools.append(("waybackurls", f"waybackurls {domain}"))
     if is_tool_installed("gau"):
-        tools.append(("gau", f"gau --subdomains {domain}"))
+        tools.append(("gau", f"gau --subs {domain}"))
     if is_tool_installed("waymore"):
         tools.append(("waymore", f"waymore -i {domain} -mode U -oU /tmp/waymore_{domain}.txt && cat /tmp/waymore_{domain}.txt"))
     if not tools:
