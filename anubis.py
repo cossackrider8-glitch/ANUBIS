@@ -512,7 +512,7 @@ def phase_22_parameters(domain, urls, outdir):
         for url in urls[:5]:
             if url and '?' not in url:
                 try:
-                    cmd = f"arjun -u {url} -t {ARJUN_THREADS} --timeout 2 -w {PARAM_WORDLIST} -o {outdir}/arjun_{domain}.txt"
+                    cmd = f"arjun -u {url} -t {ARJUN_THREADS} -T 2 -w {PARAM_WORDLIST} -o {outdir}/arjun_{domain}.txt"
                     subprocess.run(cmd, shell=True, timeout=60)
                     if os.path.exists(f"{outdir}/arjun_{domain}.txt"):
                         with open(f"{outdir}/arjun_{domain}.txt", 'r') as f:
